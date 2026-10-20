@@ -1,0 +1,23 @@
+name: SneakyRacing
+version: '${version}'
+main: com.sneakyracing.SneakyRacing
+description: Placeable racing rings and related racing objectives for Lords of Minecraft.
+api-version: '26.2'
+authors: [Team Sneakymouse]
+website: https://github.com/Team-Sneakymouse/SneakyRacing
+dependencies:
+  server:
+    SneakyUtils:
+      load: BEFORE
+      required: true
+      join-classpath: true
+permissions:
+  sneakyracing.command.reload:
+    description: Reload the plugin configuration.
+    default: op
+  sneakyracing.command.give:
+    description: Give racing ring items and racing goggles.
+    default: op
+  sneakyracing.ring.permanent:
+    description: Placed rings survive plugin reload and server restart.
+    default: op

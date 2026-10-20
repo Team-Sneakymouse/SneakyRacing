@@ -1,0 +1,29 @@
+# Correction factors for the imaginary circular plane used for cross detection.
+# diameter: multiply ring scale → world diameter in blocks (model ground footprint ≈ 1 at scale 1)
+# detection: shrink/grow the hit disk (1.0 = full diameter, lower = stricter). Default 0.75.
+# yaw: degrees added to the ItemDisplay yaw when computing the plane normal
+corrections:
+  diameter: 1.0
+  detection: 0.75
+  yaw: 0.0
+
+
+# Ring types. Placeable items and world ItemDisplays store only the type id in PDC;
+# tint, scale, respawn, and commands are always read from this live config.
+rings:
+  checkpoint:
+    display-name: "Checkpoint"
+    tint: 16777215
+    scale: 1.0
+    respawn-seconds: 30
+    # Commands run as console. Placeholders:
+    # {player} {world} {player_x} {player_y} {player_z} {ring_x} {ring_y} {ring_z}
+    commands:
+      - "say {player} hit checkpoint at {player_x} {player_y} {player_z}"
+  boost:
+    display-name: "Boost"
+    tint: 16711680
+    scale: 1.5
+    respawn-seconds: 10
+    commands:
+      - "effect give {player} speed 5 1"

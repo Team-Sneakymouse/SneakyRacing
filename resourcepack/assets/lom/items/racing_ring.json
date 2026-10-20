@@ -1,0 +1,13 @@
+{
+  "model": {
+    "type": "model",
+    "model": "lom:item/racing/racing_ring",
+    "tints": [
+      {
+        "type": "minecraft:custom_model_data",
+        "index": 0,
+        "default": 16777215
+      }
+    ]
+  }
+}
