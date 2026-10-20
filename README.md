@@ -36,6 +36,8 @@ Requires a git checkout with at least one commit (version is derived from `HEAD`
 
 Local `run/` should be a symlink to a native filesystem path (e.g. `~/.cache/sneakyracing-run`). Paper 26.2 world COW/file locks break on NTFS/FUSE mounts such as `/mnt/files`.
 
+Gradle writes under `~/.cache/SneakyRacing-gradle-build` for the same reason. A leftover repo `build/` on FUSE is unused; delete it if it appears. If `./gradlew check` fails deleting `test-results`, run `./gradlew --stop` and retry.
+
 `./gradlew runServer` downloads the SneakyUtils version pinned in `build.gradle.kts` from `maven.sneakyrp.com` and stages it under `run/plugins` (stale hand-copied jars are removed first).
 
 ## Runtime dependency

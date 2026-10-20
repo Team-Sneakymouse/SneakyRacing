@@ -11,6 +11,11 @@ plugins {
 
 group = "io.github.team-sneakymouse"
 
+// Keep build outputs on a native FS when the checkout sits on FUSE/NTFS (e.g. /mnt/files).
+layout.buildDirectory.set(
+    file("${System.getProperty("user.home")}/.cache/${rootProject.name}-gradle-build"),
+)
+
 // Requires a git checkout with at least one commit (CI and local clones).
 version =
     providers.exec {

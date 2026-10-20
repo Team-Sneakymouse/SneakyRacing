@@ -21,6 +21,9 @@ Do not substitute remembered rules, a web mirror, or an unlisted path. Follow lo
 | Runtime targets | Paper API 26.2, Java/Kotlin JVM 25 |
 | Shared Paper utils | SneakyUtils `compileOnly` + runtime `depend` (see team policy `sneakyutils.md`) |
 | Deployment | push to `main` triggers publish via `.github/workflows/publish.yml` |
+| Build output | `~/.cache/SneakyRacing-gradle-build` (keeps Gradle off FUSE/NTFS checkouts; see README) |
+
+Custom item look, CraftEngine/pack model id, server resource pack, or ItemDisplay place/orient → read `<policy-root>/policy/paper-items.md`.
 
 ### Local exceptions
 
