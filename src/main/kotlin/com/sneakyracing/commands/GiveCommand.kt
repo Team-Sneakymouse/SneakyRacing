@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.sneakyracing.SneakyRacing
+import com.sneakyracing.util.GogglesHeight
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
@@ -53,30 +54,36 @@ class GiveCommand(private val plugin: SneakyRacing) {
             )
             .then(
                 Commands.literal("goggles")
-                    .executes { giveGoggles(it, amount = 1, targetOverride = null) }
                     .then(
-                        Commands.argument("player", ArgumentTypes.player())
-                            .executes { giveGoggles(it, amount = 1, targetOverride = resolvePlayer(it)) }
+                        Commands.argument("height", StringArgumentType.word())
+                            .suggests { _, builder -> suggestGoggleHeights(builder) }
+                            .executes { giveGoggles(it, amount = 1, targetOverride = null) }
+                            .then(
+                                Commands.argument("player", ArgumentTypes.player())
+                                    .executes {
+                                        giveGoggles(it, amount = 1, targetOverride = resolvePlayer(it))
+                                    }
+                                    .then(
+                                        Commands.argument("amount", IntegerArgumentType.integer(1, 64))
+                                            .executes {
+                                                giveGoggles(
+                                                    it,
+                                                    amount = IntegerArgumentType.getInteger(it, "amount"),
+                                                    targetOverride = resolvePlayer(it),
+                                                )
+                                            },
+                                    ),
+                            )
                             .then(
                                 Commands.argument("amount", IntegerArgumentType.integer(1, 64))
                                     .executes {
                                         giveGoggles(
                                             it,
                                             amount = IntegerArgumentType.getInteger(it, "amount"),
-                                            targetOverride = resolvePlayer(it),
+                                            targetOverride = null,
                                         )
                                     },
                             ),
-                    )
-                    .then(
-                        Commands.argument("amount", IntegerArgumentType.integer(1, 64))
-                            .executes {
-                                giveGoggles(
-                                    it,
-                                    amount = IntegerArgumentType.getInteger(it, "amount"),
-                                    targetOverride = null,
-                                )
-                            },
                     ),
             )
 
@@ -85,6 +92,16 @@ class GiveCommand(private val plugin: SneakyRacing) {
         for (id in plugin.ringConfig.rings.keys) {
             if (id.lowercase().startsWith(remaining)) {
                 builder.suggest(id)
+            }
+        }
+        return builder.buildFuture()
+    }
+
+    private fun suggestGoggleHeights(builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
+        val remaining = builder.remainingLowerCase
+        for (height in GogglesHeight.entries) {
+            if (height.id.startsWith(remaining)) {
+                builder.suggest(height.id)
             }
         }
         return builder.buildFuture()
@@ -125,17 +142,25 @@ class GiveCommand(private val plugin: SneakyRacing) {
         amount: Int,
         targetOverride: Player?,
     ): Int {
+        val heightId = StringArgumentType.getString(context, "height")
+        val height = GogglesHeight.fromId(heightId)
+        if (height == null) {
+            context.source.sender.sendMessage("Unknown goggles height: $heightId (high, middle, low)")
+            return 0
+        }
         val target = targetOverride ?: (context.source.sender as? Player)
         if (target == null) {
             context.source.sender.sendMessage("Specify a player when running from console.")
             return 0
         }
-        val given = plugin.items.createGoggles(amount)
+        val given = plugin.items.createGoggles(height, amount)
         val leftover = target.inventory.addItem(given)
         if (leftover.isNotEmpty()) {
             leftover.values.forEach { target.world.dropItemNaturally(target.location, it) }
         }
-        context.source.sender.sendMessage("Gave ${amount}× racing goggles to ${target.name}.")
+        context.source.sender.sendMessage(
+            "Gave ${amount}× racing goggles (${height.displayLabel}) to ${target.name}.",
+        )
         return 1
     }
 }

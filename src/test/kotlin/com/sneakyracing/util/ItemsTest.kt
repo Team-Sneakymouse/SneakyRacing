@@ -53,9 +53,12 @@ class ItemsTest {
     }
 
     @Test
-    fun gogglesItemHasPdcFlag() {
-        val item = items.createGoggles(1)
-        assertTrue(items.isRacingGoggles(item))
-        assertFalse(items.isPlaceableRing(item))
+    fun gogglesItemHasModelAndIsDetected() {
+        for (height in GogglesHeight.entries) {
+            val item = items.createGoggles(height, 1)
+            assertTrue(items.isRacingGoggles(item), height.id)
+            assertFalse(items.isPlaceableRing(item), height.id)
+            assertEquals(height.itemModel, item.itemMeta.itemModel, height.id)
+        }
     }
 }

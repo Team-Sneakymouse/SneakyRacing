@@ -51,7 +51,7 @@ class GiveCommandTest {
         val player = server.addPlayer()
         player.addAttachment(plugin, "sneakyracing.command.give", true)
 
-        assertTrue(server.dispatchCommand(player, "sneakyracing give goggles"))
+        assertTrue(server.dispatchCommand(player, "sneakyracing give goggles middle"))
 
         val found =
             player.inventory.contents.filterNotNull().filter { !it.isEmpty }.any {
