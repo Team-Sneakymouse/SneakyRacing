@@ -16,7 +16,7 @@ class CrossingService(
     private val visibility: VisibilityService,
     private val configProvider: () -> RingConfig,
 ) {
-    private val lastBody = ConcurrentHashMap<UUID, Location>()
+    private val lastBody = ConcurrentHashMap<UUID, BodySample>()
     private var task: BukkitTask? = null
 
     fun start() {
@@ -25,8 +25,8 @@ class CrossingService(
             plugin.server.scheduler.runTaskTimer(
                 plugin,
                 Runnable { tick() },
-                1L,
-                1L,
+                TICK_PERIOD,
+                TICK_PERIOD,
             )
     }
 
@@ -42,17 +42,24 @@ class CrossingService(
 
     private fun tick() {
         val config = configProvider()
+        val rings = tracker.allSnapshot()
+        if (rings.isEmpty()) {
+            lastBody.clear()
+            return
+        }
+
         for (player in plugin.server.onlinePlayers) {
             if (!canTriggerRing(player.gameMode) || !visibility.wearingGoggles(player)) {
                 lastBody.remove(player.uniqueId)
                 continue
             }
             val current = bodyPoint(player)
-            val previous = lastBody.put(player.uniqueId, current.clone())
-            if (previous == null || previous.world != current.world) continue
+            val previous = lastBody.put(player.uniqueId, current)
+            if (previous == null || previous.worldUuid != current.worldUuid) continue
 
-            for (ring in tracker.all()) {
-                if (ring.world != current.world) continue
+            val speedBoost = player.velocity.length() * 2.0
+            for (ring in rings) {
+                if (ring.world != player.world) continue
                 if (visibility.isHidden(player.uniqueId, ring.uniqueId)) continue
 
                 val typeId = tracker.typeId(ring) ?: continue
@@ -65,11 +72,11 @@ class CrossingService(
                         config.corrections.diameter,
                         config.corrections.detection,
                     )
-                // Skip far rings cheaply
                 val ringLoc = ring.location
-                val reach = max(radius * 2.0, 4.0) + player.velocity.length() * 2.0
-                if (ringLoc.distanceSquared(current) > reach * reach &&
-                    ringLoc.distanceSquared(previous) > reach * reach
+                val reach = max(radius * 2.0, 4.0) + speedBoost
+                val reachSq = reach * reach
+                if (ringLoc.distanceSquared(current.x, current.y, current.z) > reachSq &&
+                    ringLoc.distanceSquared(previous.x, previous.y, previous.z) > reachSq
                 ) {
                     continue
                 }
@@ -99,17 +106,45 @@ class CrossingService(
                 if (!hit) continue
 
                 visibility.hideAfterCross(player, ring, type.respawnSeconds)
-                CommandRunner.run(type.commands, player, current, ringLoc)
+                CommandRunner.run(
+                    type.commands,
+                    player,
+                    Location(player.world, current.x, current.y, current.z),
+                    ringLoc,
+                )
             }
         }
     }
 
-    /** Approximate body center used for plane crossing. */
-    private fun bodyPoint(player: Player): Location {
-        val loc = player.location.clone()
-        loc.y += player.height * 0.5
-        return loc
+    /** Body-center sample without allocating a Location each tick. */
+    private fun bodyPoint(player: Player): BodySample {
+        val loc = player.location
+        return BodySample(
+            worldUuid = loc.world?.uid,
+            x = loc.x,
+            y = loc.y + player.height * 0.5,
+            z = loc.z,
+        )
     }
+
+    private data class BodySample(
+        val worldUuid: UUID?,
+        val x: Double,
+        val y: Double,
+        val z: Double,
+    )
+
+    companion object {
+        /** Every 2 ticks: halves cadence with acceptable precision for racing speeds. */
+        const val TICK_PERIOD = 2L
+    }
+}
+
+private fun Location.distanceSquared(x: Double, y: Double, z: Double): Double {
+    val dx = this.x - x
+    val dy = this.y - y
+    val dz = this.z - z
+    return dx * dx + dy * dy + dz * dz
 }
 
 /** Creative and spectator players do not trigger rings. */

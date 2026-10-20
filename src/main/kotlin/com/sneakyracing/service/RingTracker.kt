@@ -23,6 +23,9 @@ class RingTracker(
 
     fun all(): Collection<ItemDisplay> = rings.values.filter { it.isValid }
 
+    /** Valid rings as a list (one allocation); prefer once per tick over per-player [all]. */
+    fun allSnapshot(): List<ItemDisplay> = rings.values.filter { it.isValid }
+
     fun get(uuid: UUID): ItemDisplay? = rings[uuid]?.takeIf { it.isValid }
 
     fun register(display: ItemDisplay) {

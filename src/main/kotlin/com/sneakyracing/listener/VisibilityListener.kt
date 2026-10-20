@@ -3,19 +3,18 @@ package com.sneakyracing.listener
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent
 import com.sneakyracing.service.CrossingService
 import com.sneakyracing.service.VisibilityService
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryDragEvent
-import org.bukkit.event.inventory.InventoryType
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.plugin.Plugin
 
+/**
+ * Syncs ring visibility when goggles may change.
+ * Helmet changes are driven by [PlayerArmorChangeEvent] only — not every inventory click.
+ */
 class VisibilityListener(
     private val plugin: Plugin,
     private val visibility: VisibilityService,
@@ -38,33 +37,9 @@ class VisibilityListener(
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    fun onInventoryClick(event: InventoryClickEvent) {
-        val player = event.whoClicked as? Player ?: return
-        scheduleSync(player)
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    fun onInventoryDrag(event: InventoryDragEvent) {
-        val player = event.whoClicked as? Player ?: return
-        if (event.inventory.type == InventoryType.CRAFTING ||
-            event.inventory.type == InventoryType.PLAYER
-        ) {
-            scheduleSync(player)
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    fun onSwap(event: PlayerSwapHandItemsEvent) {
-        scheduleSync(event.player)
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onArmorChange(event: PlayerArmorChangeEvent) {
         if (event.slot != EquipmentSlot.HEAD) return
-        scheduleSync(event.player)
-    }
-
-    private fun scheduleSync(player: Player) {
+        val player = event.player
         plugin.server.scheduler.runTaskLater(
             plugin,
             Runnable {

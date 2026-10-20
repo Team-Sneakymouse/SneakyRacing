@@ -18,4 +18,9 @@ class CrossingServiceTest {
         assertTrue(canTriggerRing(GameMode.SURVIVAL))
         assertTrue(canTriggerRing(GameMode.ADVENTURE))
     }
+
+    @Test
+    fun crossingRunsEveryTwoTicks() {
+        org.junit.jupiter.api.Assertions.assertEquals(2L, CrossingService.TICK_PERIOD)
+    }
 }
