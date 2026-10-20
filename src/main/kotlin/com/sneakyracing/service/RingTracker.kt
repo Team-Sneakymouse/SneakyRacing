@@ -3,6 +3,7 @@ package com.sneakyracing.service
 import com.sneakyracing.util.Items
 import com.sneakyracing.util.Keys
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.persistence.PersistentDataType
@@ -19,6 +20,11 @@ class RingTracker(
     private val items: Items,
     private val configProvider: () -> RingConfig,
 ) {
+    companion object {
+        /** Default reach for admin set-type near the player. */
+        const val NEARBY_TYPE_RADIUS = 5.0
+    }
+
     private val rings = ConcurrentHashMap<UUID, ItemDisplay>()
 
     fun all(): Collection<ItemDisplay> = rings.values.filter { it.isValid }
@@ -114,6 +120,39 @@ class RingTracker(
             val type = config.type(id) ?: continue
             display.setItemStack(items.tintedRingStack(type))
         }
+    }
+
+    /** Same world, distance ≤ [radius] from [origin]. */
+    fun ringsWithin(origin: Location, radius: Double = NEARBY_TYPE_RADIUS): List<ItemDisplay> {
+        val world = origin.world ?: return emptyList()
+        val r2 = radius * radius
+        return allSnapshot().filter { ring ->
+            ring.world == world && ring.location.distanceSquared(origin) <= r2
+        }
+    }
+
+    /**
+     * Changes ring type id, tint item, and resets display scale to [type]'s default.
+     * Unlike [refreshVisuals], scale is intentionally overwritten.
+     */
+    fun setType(display: ItemDisplay, type: RingType) {
+        display.persistentDataContainer.set(keys.ringType, PersistentDataType.STRING, type.id)
+        display.setItemStack(items.tintedRingStack(type))
+        applyScale(display, type.scale)
+    }
+
+    /** Applies [setType] to every tracked ring within [radius] of [origin]. Returns how many updated. */
+    fun setTypeNearby(
+        origin: Location,
+        type: RingType,
+        radius: Double = NEARBY_TYPE_RADIUS,
+    ): Int {
+        var updated = 0
+        for (ring in ringsWithin(origin, radius)) {
+            setType(ring, type)
+            updated++
+        }
+        return updated
     }
 
     fun displayScale(display: ItemDisplay): Double {

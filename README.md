@@ -15,9 +15,10 @@ Paper plugin for placeable **racing rings** — glowing circular checkpoints tha
 
 | Command | Permission | Description |
 |---------|------------|-------------|
-| `/sneakyracing reload` | `sneakyracing.command.reload` | Reload config and refresh ring tint/scale from type ids |
+| `/sneakyracing reload` | `sneakyracing.command.reload` | Reload config and refresh ring tint from type ids (scale unchanged) |
 | `/sneakyracing give ring <type> [player] [amount]` | `sneakyracing.command.give` | Give placeable ring items |
 | `/sneakyracing give goggles <high\|middle\|low> [player] [amount]` | `sneakyracing.command.give` | Give racing goggles (eye height) |
+| `/sneakyracing settype <type>` | `sneakyracing.command.settype` | Set type of rings within 5 blocks (resets scale to type default) |
 
 Temporary rings (default) are removed on `/sneakyracing reload` and on server stop. Players with `sneakyracing.ring.permanent` place rings that persist.
 

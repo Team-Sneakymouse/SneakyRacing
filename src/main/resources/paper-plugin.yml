@@ -18,6 +18,9 @@ permissions:
   sneakyracing.command.give:
     description: Give racing ring items and racing goggles.
     default: op
+  sneakyracing.command.settype:
+    description: Change the type of nearby racing rings (resets scale to the type default).
+    default: op
   sneakyracing.ring.permanent:
     description: Placed rings survive plugin reload and server restart.
     default: op

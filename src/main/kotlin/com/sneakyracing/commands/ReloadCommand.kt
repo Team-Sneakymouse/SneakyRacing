@@ -21,5 +21,6 @@ class ReloadCommand(private val plugin: SneakyRacing) {
                     },
             )
             .then(GiveCommand(plugin).subtree())
+            .then(SetTypeCommand(plugin).subtree())
             .build()
 }

@@ -70,7 +70,7 @@ open class SneakyRacing : JavaPlugin() {
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
             event.registrar().register(
                 ReloadCommand(this).create(),
-                "SneakyRacing commands (reload, give)",
+                "SneakyRacing commands (reload, give, settype)",
             )
         }
 
