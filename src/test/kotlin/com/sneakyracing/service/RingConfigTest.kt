@@ -9,6 +9,22 @@ import java.io.StringReader
 class RingConfigTest {
 
     @Test
+    fun permanenceDefaultsToTrueAndCanBeDisabledPerType() {
+        val yaml = YamlConfiguration.loadConfiguration(StringReader("""
+            rings:
+              default: {}
+              persistent:
+                permanent: true
+              temporary:
+                permanent: false
+        """.trimIndent()))
+        val parsed = RingConfig.from(yaml)
+        assertEquals(true, parsed.type("default")!!.permanent)
+        assertEquals(true, parsed.type("persistent")!!.permanent)
+        assertEquals(false, parsed.type("temporary")!!.permanent)
+    }
+
+    @Test
     fun parsesCorrectionsAndRingTypes() {
         val yaml =
             """

@@ -30,9 +30,4 @@ class PlaceConsumeTest {
         assertEquals(-25f, ringPlacePitch(-25f, sneaking = false))
         assertEquals(0f, ringPlacePitch(-25f, sneaking = true))
     }
-
-    @Test
-    fun permanentPermissionNode() {
-        assertEquals("sneakyracing.ring.permanent", PlaceListener.PERMANENT_PERMISSION)
-    }
 }
