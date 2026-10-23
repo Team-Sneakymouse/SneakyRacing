@@ -71,7 +71,7 @@ class RingTracker(
     }
 
     /**
-     * Removes rings that were not placed with the permanent permission.
+     * Removes rings placed from a temporary ring type.
      * Used on reload and disable so temporary rings do not linger.
      */
     fun removeTransient(visibility: VisibilityService): Int {
@@ -90,19 +90,18 @@ class RingTracker(
     fun spawnRing(
         location: org.bukkit.Location,
         type: RingType,
-        permanent: Boolean = false,
     ): ItemDisplay {
         val world = requireNotNull(location.world) { "Ring spawn location has no world" }
         val display =
             world.spawn(location, ItemDisplay::class.java) { entity ->
-                entity.isPersistent = permanent
+                entity.isPersistent = type.permanent
                 entity.setVisibleByDefault(false)
                 entity.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE)
                 entity.setItemStack(items.tintedRingStack(type))
                 applyScale(entity, type.scale)
                 entity.persistentDataContainer.set(keys.racingRing, PersistentDataType.BYTE, 1)
                 entity.persistentDataContainer.set(keys.ringType, PersistentDataType.STRING, type.id)
-                if (permanent) {
+                if (type.permanent) {
                     entity.persistentDataContainer.set(keys.ringPermanent, PersistentDataType.BYTE, 1)
                 }
             }

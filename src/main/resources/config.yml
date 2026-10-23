@@ -8,13 +8,15 @@ corrections:
   yaw: 0.0
 
 
-# Ring types. Placeable items and world ItemDisplays store only the type id in PDC;
-# tint, scale, respawn, and commands are always read from this live config.
+# Ring types. Placeable items and world ItemDisplays store the type id in PDC.
+# Permanence is saved on placement (default true); false rings are removed on reload/stop.
+# Changing config or using settype does not change existing rings' saved permanence.
 rings:
   checkpoint:
     display-name: "Checkpoint"
     tint: 16777215
     scale: 1.0
+    permanent: true
     respawn-seconds: 30
     # Commands run as console. Placeholders:
     # {player} {world} {player_x} {player_y} {player_z} {ring_x} {ring_y} {ring_z}
@@ -24,6 +26,7 @@ rings:
     display-name: "Boost"
     tint: 16711680
     scale: 1.5
+    permanent: true
     respawn-seconds: 10
     commands:
       - "effect give {player} speed 5 1"

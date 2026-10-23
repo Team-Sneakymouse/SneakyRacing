@@ -17,6 +17,7 @@ data class RingType(
     val scale: Float,
     val respawnSeconds: Double,
     val commands: List<String>,
+    val permanent: Boolean = true,
 )
 
 data class RingConfig(
@@ -53,6 +54,7 @@ data class RingConfig(
                 scale = section.getDouble("scale", 1.0).toFloat(),
                 respawnSeconds = section.getDouble("respawn-seconds", 30.0),
                 commands = section.getStringList("commands"),
+                permanent = section.getBoolean("permanent", true),
             )
     }
 }

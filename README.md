@@ -20,7 +20,9 @@ Paper plugin for placeable **racing rings** — glowing circular checkpoints tha
 | `/sneakyracing give goggles <high\|middle\|low> [player] [amount]` | `sneakyracing.command.give` | Give racing goggles (eye height) |
 | `/sneakyracing settype <type>` | `sneakyracing.command.settype` | Set type of rings within 5 blocks (resets scale to type default) |
 
-Temporary rings (default) are removed on `/sneakyracing reload` and on server stop. Players with `sneakyracing.ring.permanent` place rings that persist.
+Ring types control permanence with `permanent: true` (the default when omitted). Set `permanent: false` for temporary rings, which are removed on `/sneakyracing reload` and on server stop. No placement permission is required for permanent rings.
+
+Permanence is saved when a ring is placed; changing configuration or using `settype` does not retroactively change existing rings. Existing rings retain their saved permanence. Replace a ring to apply a new permanence setting.
 
 ## Config
 

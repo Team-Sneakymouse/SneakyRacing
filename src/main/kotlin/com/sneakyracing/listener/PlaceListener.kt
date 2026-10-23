@@ -1,12 +1,10 @@
 package com.sneakyracing.listener
 
-import com.sneakyracing.SneakyRacing
 import com.sneakyracing.service.RingConfig
 import com.sneakyracing.service.RingTracker
 import com.sneakyracing.service.VisibilityService
 import com.sneakyracing.util.Items
 import org.bukkit.GameMode
-import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -21,10 +19,6 @@ class PlaceListener(
     private val visibility: VisibilityService,
     private val configProvider: () -> RingConfig,
 ) : Listener {
-
-    companion object {
-        const val PERMANENT_PERMISSION = "${SneakyRacing.IDENTIFIER}.ring.permanent"
-    }
 
     // ignoreCancelled=false so RIGHT_CLICK_AIR still works when another plugin cancels the interact.
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
@@ -57,8 +51,7 @@ class PlaceListener(
         spawnAt.yaw = player.yaw
         spawnAt.pitch = ringPlacePitch(player.pitch, player.isSneaking)
 
-        val permanent = canPlacePermanent(player)
-        val display = tracker.spawnRing(spawnAt, type, permanent = permanent)
+        val display = tracker.spawnRing(spawnAt, type)
         visibility.onRingPlaced(display)
 
         if (shouldConsumeRingItem(player.gameMode)) {
@@ -80,6 +73,3 @@ fun shouldConsumeRingItem(gameMode: GameMode): Boolean = gameMode != GameMode.CR
 /** Sneaking forces a flat ring (pitch 0); otherwise copy the player's look pitch. */
 fun ringPlacePitch(playerPitch: Float, sneaking: Boolean): Float =
     if (sneaking) 0f else playerPitch
-
-fun canPlacePermanent(player: Player): Boolean =
-    player.hasPermission(PlaceListener.PERMANENT_PERMISSION)
