@@ -95,3 +95,11 @@ Failing tests are not acceptable. A skipped test does not demonstrate the behavi
 ## Human docs
 
 - `README.md` — plugin usage and build notes
+
+## Repo-specific rules
+
+- **Ring geometry is pure.** Plane-crossing maths stays in `RingPlaneMath` (no Bukkit) with `RingPlaneMathTest`.
+- **Goggles are PDC-tagged helmets.** Visibility is driven only by the helmet PDC tag; create gear through `util/Items`.
+- **Ring commands run as console** (`CommandRunner`). Substitute only the documented placeholders; never put user text in the command string.
+- **Rings must survive chunk reload.** Don't rely on in-memory ring lists; rebuild from the display entities (PDC) on chunk load and keep `PlacePermanenceTest` green.
+- **Delayed shows go through `VisibilityService`.** Respawn timers and join delays use its `runTaskLater` wrapper; cancel them on quit.
