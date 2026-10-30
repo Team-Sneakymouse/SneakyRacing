@@ -4,7 +4,10 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
-/** Substitutes placeholders and dispatches ring-hit commands as console. */
+/**
+ * Substitutes placeholders and dispatches ring-hit commands as console.
+ * Only the placeholders below may be substituted; never put user-supplied text into the command string.
+ */
 object CommandRunner {
 
     fun run(commands: List<String>, player: Player, crossAt: Location, ringAt: Location) {
