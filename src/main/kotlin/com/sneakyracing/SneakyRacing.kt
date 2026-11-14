@@ -1,5 +1,6 @@
 package com.sneakyracing
 
+import com.sneakyitems.api.SneakyItemsAPI
 import com.sneakyracing.commands.ReloadCommand
 import com.sneakyracing.listener.PlaceListener
 import com.sneakyracing.listener.RingEntityListener
@@ -8,10 +9,12 @@ import com.sneakyracing.service.CrossingService
 import com.sneakyracing.service.RingConfig
 import com.sneakyracing.service.RingTracker
 import com.sneakyracing.service.VisibilityService
+import com.sneakyracing.util.GogglesHeight
 import com.sneakyracing.util.Items
 import com.sneakyracing.util.Keys
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.plugin.java.JavaPlugin
+import java.io.File
 
 open class SneakyRacing : JavaPlugin() {
 
@@ -82,6 +85,7 @@ open class SneakyRacing : JavaPlugin() {
     fun reloadPlugin() {
         reloadConfig()
         ringConfig = RingConfig.from(config)
+        registerMagicItems()
         ringTracker.scanAllWorlds()
         val removed = ringTracker.removeTransient(visibilityService)
         if (removed > 0) {
@@ -89,6 +93,24 @@ open class SneakyRacing : JavaPlugin() {
         }
         ringTracker.refreshVisuals()
         visibilityService.syncAllOnline()
+    }
+
+    /** Own MagicsSpells-style defs under resources/magic-items.yml; PDC namespace stays magicspells. */
+    private fun registerMagicItems() {
+        saveResource("magic-items.yml", false)
+        SneakyItemsAPI.clearOwner(this)
+        val n = SneakyItemsAPI.registerMagicItemsFile(this, "magicspells", File(dataFolder, "magic-items.yml"))
+        // World stacks before SneakyItems: own PDC keys, and look-only goggles matched by model.
+        SneakyItemsAPI.registerLegacyKey(this, keys.placeableRing, Items.RING_MAGIC)
+        SneakyItemsAPI.registerLegacyKey(this, keys.racingGoggles, Items.GOGGLES_MAGIC)
+        for (height in GogglesHeight.entries) {
+            SneakyItemsAPI.registerLegacyPattern(
+                this,
+                Items.GOGGLES_MAGIC,
+                "paper{\"item-model\":\"${height.itemModel}\"}",
+            )
+        }
+        logger.info("Registered $n magic item(s) with SneakyItems.")
     }
 
     override fun onDisable() {
@@ -99,6 +121,7 @@ open class SneakyRacing : JavaPlugin() {
         }
         visibilityService.shutdown()
         ringTracker.clear()
+        SneakyItemsAPI.clearOwner(this)
         logger.info("SneakyRacing disabled.")
     }
 }

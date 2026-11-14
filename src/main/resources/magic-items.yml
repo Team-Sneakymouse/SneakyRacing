@@ -1,0 +1,26 @@
+# Placeable racing ring and racing goggles (SneakyItems; PDC namespace magicspells).
+# Ring type/tint and goggles height stay per-copy (ignored-attributes + own PDC / model).
+magic-items:
+  item-sneakyracing-ring:
+    type: paper
+    item-model: lom:racing_ring
+    name: "&aRacing Ring"
+    lore:
+      - "&7Right-click to place a racing ring."
+    ignored-attributes:
+      - name
+      - item_name
+      - custom_model_data
+
+  item-sneakyracing-goggles:
+    type: paper
+    item-model: lom:racing_goggles_middle
+    name: "&aRacing Goggles"
+    lore:
+      - "&7Wear to see racing rings."
+    equippable:
+      slot: HEAD
+    ignored-attributes:
+      - name
+      - item_name
+      - item_model

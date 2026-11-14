@@ -11,6 +11,10 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
+    SneakyItems:
+      load: BEFORE
+      required: true
+      join-classpath: true
 permissions:
   sneakyracing.command.reload:
     description: Reload the plugin configuration.

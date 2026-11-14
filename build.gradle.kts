@@ -38,21 +38,26 @@ repositories {
 
 val paperApi = "26.2.build.+"
 val mockBukkitVersion = "4.117.0"
-/** Keep compileOnly and runServer pluginJars on the same published SneakyUtils. */
+/** Keep compileOnly and runServer pluginJars on the same published SneakyUtils / SneakyItems. */
 val sneakyUtilsVersion = "2026.10.18-657d452bd6f4"
+val sneakyItemsVersion = "2026.11.14-ab23dacd2d06"
 
-/** Runtime plugin jar for ./gradlew runServer (resolved from maven.sneakyrp.com into the Gradle cache). */
+/** Runtime plugin jars for ./gradlew runServer (resolved from maven.sneakyrp.com into the Gradle cache). */
 val sneakyUtilsPlugin by configurations.creating
+val sneakyItemsPlugin by configurations.creating
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:$paperApi")
     compileOnly("io.github.team-sneakymouse:sneakyutils:$sneakyUtilsVersion")
+    compileOnly("io.github.team-sneakymouse:sneakyitems:$sneakyItemsVersion")
     // Plugin jar only — do not stage transitive libs (e.g. kotlin-stdlib) as Paper plugins.
     sneakyUtilsPlugin("io.github.team-sneakymouse:sneakyutils:$sneakyUtilsVersion") { isTransitive = false }
+    sneakyItemsPlugin("io.github.team-sneakymouse:sneakyitems:$sneakyItemsVersion") { isTransitive = false }
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
 
     testImplementation("io.papermc.paper:paper-api:$paperApi")
     testImplementation("io.github.team-sneakymouse:sneakyutils:$sneakyUtilsVersion")
+    testImplementation("io.github.team-sneakymouse:sneakyitems:$sneakyItemsVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v26.2:$mockBukkitVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -90,8 +95,8 @@ tasks {
     runServer {
         minecraftVersion("26.2")
         // Resolved from Maven (Gradle cache); Paper still needs a jar on disk under run/plugins.
-        pluginJars.from(sneakyUtilsPlugin)
-        // Drop any hand-copied / stale SneakyUtils jar so only the pinned version from pluginJars is loaded.
+        pluginJars.from(sneakyUtilsPlugin, sneakyItemsPlugin)
+        // Drop any hand-copied / stale jars so only the pinned versions from pluginJars are loaded.
         doFirst {
             val pluginsDir = runDirectory.get().asFile.resolve("plugins")
             if (!pluginsDir.isDirectory) return@doFirst
@@ -99,7 +104,10 @@ tasks {
                 ?.filter {
                     it.isFile &&
                         it.name.endsWith(".jar", ignoreCase = true) &&
-                        it.name.contains("sneakyutils", ignoreCase = true)
+                        (
+                            it.name.contains("sneakyutils", ignoreCase = true) ||
+                                it.name.contains("sneakyitems", ignoreCase = true)
+                        )
                 }
                 ?.forEach { stale ->
                     logger.lifecycle("runServer: removing stale {}", stale.name)
