@@ -1,5 +1,6 @@
 package com.sneakyracing.util
 
+import com.sneakyitems.api.SneakyItemsAPI
 import com.sneakyracing.SneakyRacing
 import com.sneakyracing.service.RingType
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -43,6 +44,7 @@ class ItemsTest {
         val item = items.createRingItem(type, 3)
         assertEquals(3, item.amount)
         assertTrue(items.isPlaceableRing(item))
+        assertEquals(Items.RING_MAGIC, SneakyItemsAPI.keyOf(item))
         assertEquals("checkpoint", items.ringTypeId(item))
         assertFalse(items.isRacingGoggles(item))
 
@@ -57,6 +59,7 @@ class ItemsTest {
         for (height in GogglesHeight.entries) {
             val item = items.createGoggles(height, 1)
             assertTrue(items.isRacingGoggles(item), height.id)
+            assertEquals(Items.GOGGLES_MAGIC, SneakyItemsAPI.keyOf(item), height.id)
             assertFalse(items.isPlaceableRing(item), height.id)
             assertEquals(height.itemModel, item.itemMeta.itemModel, height.id)
         }

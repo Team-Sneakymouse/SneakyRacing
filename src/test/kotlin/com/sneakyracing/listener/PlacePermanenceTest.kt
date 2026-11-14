@@ -1,9 +1,9 @@
 package com.sneakyracing.listener
 
+import com.sneakyitems.events.MagicItemClickEvent
 import com.sneakyracing.SneakyRacing
+import com.sneakyracing.util.Items
 import org.bukkit.entity.ItemDisplay
-import org.bukkit.event.block.Action
-import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -66,17 +66,31 @@ class PlacePermanenceTest {
         val listener = PlaceListener(plugin.items, plugin.ringTracker, plugin.visibilityService) {
             plugin.ringConfig.copy(rings = mapOf(type.id to type))
         }
-        val event = PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, item, null,
-            org.bukkit.block.BlockFace.SELF, EquipmentSlot.HAND)
+        val event =
+            MagicItemClickEvent(
+                player,
+                Items.RING_MAGIC,
+                item,
+                EquipmentSlot.HAND,
+                MagicItemClickEvent.Click.RIGHT,
+                MagicItemClickEvent.Trigger.AIR,
+                null,
+                null,
+                null,
+                null,
+                false,
+            )
 
-        listener.onInteract(event)
+        listener.onMagicClick(event)
 
-        assertEquals(org.bukkit.event.Event.Result.DENY, event.useItemInHand())
+        assertTrue(event.isCancelled)
         val ring = plugin.ringTracker.all().single()
         assertEquals(permanent, ring.isPersistent)
         assertEquals(permanent, plugin.ringTracker.isPermanent(ring))
-        assertEquals(if (permanent) 0 else 1,
-            plugin.ringTracker.removeTransient(plugin.visibilityService))
+        assertEquals(
+            if (permanent) 0 else 1,
+            plugin.ringTracker.removeTransient(plugin.visibilityService),
+        )
         assertEquals(permanent, ring.isValid)
     }
 }
