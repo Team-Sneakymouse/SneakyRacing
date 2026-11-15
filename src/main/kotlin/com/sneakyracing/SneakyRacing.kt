@@ -14,7 +14,6 @@ import com.sneakyracing.util.Items
 import com.sneakyracing.util.Keys
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.plugin.java.JavaPlugin
-import java.io.File
 
 open class SneakyRacing : JavaPlugin() {
 
@@ -97,9 +96,13 @@ open class SneakyRacing : JavaPlugin() {
 
     /** Own MagicsSpells-style defs under resources/magic-items.yml; PDC namespace stays magicspells. */
     private fun registerMagicItems() {
-        if (!java.io.File(dataFolder, "magic-items.yml").exists()) saveResource("magic-items.yml", false)
         SneakyItemsAPI.clearOwner(this)
-        val n = SneakyItemsAPI.registerMagicItemsFile(this, "magicspells", File(dataFolder, "magic-items.yml"))
+        var n = 0
+        getResource("magic-items.yml")?.use { stream ->
+            val yaml = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                java.io.InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8))
+            n = SneakyItemsAPI.registerFromRoot(this, "magicspells", yaml)
+        } ?: logger.warning("Missing bundled resource: magic-items.yml")
         // World stacks before SneakyItems: own PDC keys, and look-only goggles matched by model.
         SneakyItemsAPI.registerLegacyKey(this, keys.placeableRing, Items.RING_MAGIC)
         SneakyItemsAPI.registerLegacyKey(this, keys.racingGoggles, Items.GOGGLES_MAGIC)
